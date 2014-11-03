@@ -63,3 +63,28 @@ module.exports['connect'] = testCase({
         test.done();
     }
 });
+
+module.exports['as_string'] = testCase({
+    'should not add extended properties from prototype': function(test) {
+        Object.prototype.foo = 'bar';
+        var Frame = require('../lib/frame.js').Frame;
+        var frame = new Frame();
+        frame.build_frame({
+            command: 'CONNECT',
+            headers: {
+                'login': 'somelogin',
+                'passcode': 'somepass'
+            }
+        });
+
+        var frame_text = frame.as_string();
+        var foo_in_frame = frame_text.indexOf('foo') !== -1;
+        test.equal(
+            foo_in_frame,
+            false,
+            "Frame should not contain the extended property foo"
+        );
+        test.done()
+        delete Object.prototype.foo;
+    }
+});
